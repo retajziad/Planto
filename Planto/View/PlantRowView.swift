@@ -5,6 +5,9 @@ struct PlantRowView: View {
     let plant: Plant
     let isWatered: Bool
 
+    // False for plants that do not need water today. They are shown faded.
+    let isTodaysReminder: Bool
+
     // What to do when the circle is tapped. The row itself does not change data.
     let toggleAction: () -> Void
 
@@ -60,7 +63,17 @@ struct PlantRowView: View {
             Spacer()
         }
         .padding(.vertical, 6)
-        .opacity(isWatered ? 0.8 : 1)
+        .opacity(rowOpacity)
+    }
+
+    var rowOpacity: Double {
+        if !isTodaysReminder {
+            return 0.5
+        }
+        if isWatered {
+            return 0.8
+        }
+        return 1
     }
 }
 
@@ -68,6 +81,7 @@ struct PlantRowView: View {
     PlantRowView(
         plant: Plant(name: "Monstera", room: .kitchen, light: .fullSun, wateringDays: .everyDay, waterAmount: .ml20to50),
         isWatered: false,
+        isTodaysReminder: true,
         toggleAction: {}
     )
     .preferredColorScheme(.dark)

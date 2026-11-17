@@ -12,8 +12,8 @@ class PlantsViewModel: ObservableObject {
         }
     }
 
-    // The current day. It is refreshed when the app opens, so the list
-    // shows the right reminders after midnight.
+    // The current day. It is refreshed when the app opens and at midnight,
+    // so the list always shows the right reminders.
     @Published var today = Date()
 
     // True after the user has saved their first plant (used to pick the empty screen).
@@ -30,11 +30,30 @@ class PlantsViewModel: ObservableObject {
 
     // MARK: - Today's reminders
 
-    // Plants that need water today, plus the ones already watered today.
+    // True when the plant is one of today's reminders:
+    // it needs water today (or is late), or it was already watered today.
+    func isTodaysReminder(_ plant: Plant) -> Bool {
+        return plant.isDue(on: today) || plant.wasWatered(on: today)
+    }
+
+    // Today's reminders. The progress bar and All Done only look at these.
     var todaysPlants: [Plant] {
         var result: [Plant] = []
         for plant in plants {
-            if plant.isDue(on: today) || plant.wasWatered(on: today) {
+            if isTodaysReminder(plant) {
+                result.append(plant)
+            }
+        }
+        return result
+    }
+
+    // Every saved plant, for the list on the main screen:
+    // today's reminders first, then the plants that do not need water today.
+    // Showing all of them means every plant can always be edited or deleted.
+    var plantsForList: [Plant] {
+        var result = todaysPlants
+        for plant in plants {
+            if !isTodaysReminder(plant) {
                 result.append(plant)
             }
         }
@@ -77,7 +96,11 @@ class PlantsViewModel: ObservableObject {
         hasAddedPlantBefore = true
         UserDefaults.standard.set(true, forKey: hasAddedPlantKey)
 
-        notifications.scheduleReminders(for: plants)
+        // Ask for notification permission when the user saves a plant
+        // (iOS shows the alert only once). If the user allows it, schedule the reminders.
+        notifications.requestPermission {
+            self.notifications.scheduleReminders(for: self.plants)
+        }
     }
 
     func updatePlant(_ updatedPlant: Plant) {
@@ -118,7 +141,7 @@ class PlantsViewModel: ObservableObject {
 
     // MARK: - New day
 
-    // Called when the app becomes active.
+    // Called when the app opens, comes back from the background, or the day changes at midnight.
     func refreshToday() {
         today = Date()
 

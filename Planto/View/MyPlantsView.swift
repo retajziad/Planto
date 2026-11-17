@@ -1,7 +1,7 @@
 import SwiftUI
 
 // The main screen. It shows one of four states:
-// start (new user), no reminders today, the reminders list, or all done.
+// start (new user), no reminders (every plant was deleted), the plants list, or all done.
 struct MyPlantsView: View {
     @ObservedObject var viewModel: PlantsViewModel
 
@@ -28,8 +28,8 @@ struct MyPlantsView: View {
 
                 if viewModel.plants.isEmpty && !viewModel.hasAddedPlantBefore {
                     EmptyStateView(showAddSheet: $showAddSheet)
-                } else if viewModel.todaysPlants.isEmpty {
-                    // No plants at all, or no plant needs water today.
+                } else if viewModel.plants.isEmpty {
+                    // A returning user who deleted every plant.
                     noRemindersMessage
                 } else if viewModel.isAllDone && !showCompletedList {
                     AllDoneView()
@@ -38,7 +38,10 @@ struct MyPlantsView: View {
                             showCompletedList = true
                         }
                 } else {
-                    progressSection
+                    // The progress bar is only shown on days that have reminders.
+                    if !viewModel.todaysPlants.isEmpty {
+                        progressSection
+                    }
                     plantsList
                 }
             }
@@ -64,6 +67,12 @@ struct MyPlantsView: View {
                 showCompletedList = false
                 viewModel.refreshToday()
             }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.significantTimeChangeNotification)) { _ in
+            // iOS sends this at midnight (and when the time zone changes)
+            // while the app is open, so the list moves on to the new day.
+            showCompletedList = false
+            viewModel.refreshToday()
         }
     }
 
@@ -112,10 +121,11 @@ struct MyPlantsView: View {
 
     var plantsList: some View {
         List {
-            ForEach(viewModel.todaysPlants) { plant in
+            ForEach(viewModel.plantsForList) { plant in
                 PlantRowView(
                     plant: plant,
                     isWatered: plant.wasWatered(on: viewModel.today),
+                    isTodaysReminder: viewModel.isTodaysReminder(plant),
                     toggleAction: {
                         withAnimation {
                             viewModel.toggleWatered(plant)
