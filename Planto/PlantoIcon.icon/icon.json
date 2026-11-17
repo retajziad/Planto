@@ -1,9 +1,7 @@
 {
   "fill-specializations" : [
     {
-      "value" : {
-        "solid" : "extended-gray:1.00000,1.00000"
-      }
+      "value" : "system-dark"
     },
     {
       "appearance" : "dark",
@@ -38,6 +36,9 @@
       "layers" : [
         {
           "blend-mode-specializations" : [
+            {
+              "value" : "multiply"
+            },
             {
               "appearance" : "dark",
               "value" : "multiply"
@@ -74,6 +75,9 @@
             }
           ],
           "fill-specializations" : [
+            {
+              "value" : "automatic"
+            },
             {
               "appearance" : "dark",
               "value" : "automatic"
