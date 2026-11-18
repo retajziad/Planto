@@ -28,9 +28,13 @@ struct ReminderFormView: View {
                 Section {
                     HStack {
                         Text("Plant Name")
-                        TextField("Pothos", text: $name)
+                        // prompt is the grey placeholder text shown while the field is empty.
+                        TextField("Plant Name", text: $name, prompt: Text("Pothos").foregroundStyle(Color("PlaceholderText")))
+                            .font(.system(size: 17))
                             .tint(Color("CheckGreen"))
                     }
+                    // The name card is taller than the other rows in Sketch (59 points).
+                    .padding(.vertical, 6)
                 }
 
                 Section {
@@ -80,10 +84,16 @@ struct ReminderFormView: View {
                             viewModel.deletePlant(plantToEdit)
                             dismiss()
                         }
+                        .font(.system(size: 17))
                         .frame(maxWidth: .infinity)
                     }
                 }
             }
+            .font(.system(size: 18))
+            .listRowSeparatorTint(Color("FormDivider"))
+            // Space between the cards and row height, from the Sketch layout.
+            .listSectionSpacing(40)
+            .environment(\.defaultMinListRowHeight, 47)
             .tint(.gray)
             .navigationTitle("Set Reminder")
             .navigationBarTitleDisplayMode(.inline)

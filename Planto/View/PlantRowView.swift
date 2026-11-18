@@ -12,38 +12,42 @@ struct PlantRowView: View {
     let toggleAction: () -> Void
 
     var body: some View {
-        HStack(spacing: 22) {
+        HStack(spacing: 23) {
             Button {
                 toggleAction()
             } label: {
                 Image(systemName: isWatered ? "checkmark.circle.fill" : "circle")
-                    .font(.system(size: 26))
-                    .foregroundStyle(isWatered ? Color("CheckGreen") : Color.gray)
+                    .font(.system(size: 25))
+                    .foregroundStyle(isWatered ? Color("CheckGreen") : Color("CircleGray"))
             }
             .buttonStyle(.plain)
             .accessibilityLabel(isWatered ? "Mark as not watered" : "Mark as watered")
 
-            VStack(alignment: .leading, spacing: 6) {
-                HStack(spacing: 6) {
+            VStack(alignment: .leading, spacing: 0) {
+                HStack(spacing: 4) {
                     Image(systemName: "location")
                     Text("in \(plant.room.rawValue)")
                 }
-                .font(.subheadline)
-                .foregroundStyle(.gray)
+                .font(.system(size: 15))
+                .kerning(-0.24)
+                .foregroundStyle(Color.white.opacity(0.5))
 
                 Text(plant.name)
                     .font(.system(size: 28))
-                    .foregroundStyle(isWatered ? Color.gray : Color.white)
+                    .kerning(0.36)
+                    .foregroundStyle(isWatered ? Color("CompletedName") : Color.white)
+                    .padding(.top, 4)
 
-                HStack(spacing: 12) {
+                HStack(spacing: 13) {
                     HStack(spacing: 4) {
                         Image(systemName: plant.light.iconName)
                         Text(plant.light.rawValue)
                     }
-                    .font(.footnote)
+                    .font(.system(size: 14))
                     .foregroundStyle(Color("SunYellow"))
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
+                    .opacity(isWatered ? 0.68 : 1)
+                    .padding(.horizontal, 9)
+                    .frame(height: 23)
                     .background(Color("ChipBackground"))
                     .clipShape(RoundedRectangle(cornerRadius: 8))
 
@@ -51,29 +55,23 @@ struct PlantRowView: View {
                         Image(systemName: "drop")
                         Text(plant.waterAmount.rawValue)
                     }
-                    .font(.footnote)
+                    .font(.system(size: 14, weight: .medium))
                     .foregroundStyle(Color("WaterBlue"))
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
+                    .padding(.horizontal, 9)
+                    .frame(height: 23)
                     .background(Color("ChipBackground"))
                     .clipShape(RoundedRectangle(cornerRadius: 8))
                 }
+                .padding(.top, 7)
             }
 
             Spacer()
         }
-        .padding(.vertical, 6)
-        .opacity(rowOpacity)
-    }
-
-    var rowOpacity: Double {
-        if !isTodaysReminder {
-            return 0.5
-        }
-        if isWatered {
-            return 0.8
-        }
-        return 1
+        // Start the line between rows under the circle, like in Sketch (not under the text).
+        .alignmentGuide(.listRowSeparatorLeading) { _ in 0 }
+        // Plants that do not need water today are faded (not part of the Sketch design,
+        // it only marks plants outside today's reminders).
+        .opacity(isTodaysReminder ? 1 : 0.5)
     }
 }
 

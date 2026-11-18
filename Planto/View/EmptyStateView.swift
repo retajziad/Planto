@@ -12,31 +12,31 @@ struct EmptyStateView: View {
                     .resizable()
                     .scaledToFit()
                     .frame(width: 164)
-                    .padding(.top, 71)
+                    .padding(.top, 77)
 
                 Text("Start your plant journey!")
                     .font(.system(size: 25, weight: .semibold))
                     .foregroundStyle(.white)
-                    .padding(.top, 41)
+                    .padding(.top, 37)
 
                 Text("Now all your plants will be in one place and\nwe will help you take care of them :)🪴")
-                    .font(.subheadline)
-                    .foregroundStyle(.gray)
+                    .font(.system(size: 16))
+                    .foregroundStyle(Color("SecondaryText").opacity(0.7))
                     .multilineTextAlignment(.center)
-                    .padding(.horizontal, 20)
-                    .padding(.top, 22)
+                    .frame(width: 315)
+                    .padding(.top, 25)
 
                 // Liquid Glass: a green glass capsule button.
                 Button {
                     showAddSheet = true
                 } label: {
                     Text("Set Plant Reminder")
-                        .font(.headline)
-                        .frame(width: 240, height: 28)
+                        .font(.system(size: 17, weight: .medium))
+                        .frame(width: 256, height: 28)
                 }
                 .buttonStyle(.glassProminent)
                 .tint(Color("ButtonGreen"))
-                .padding(.top, 100)
+                .padding(.top, 105)
             }
             .frame(maxWidth: .infinity)
         }

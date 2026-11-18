@@ -14,12 +14,12 @@ struct AllDoneView: View {
                 Text("All Done! 🎉")
                     .font(.system(size: 25, weight: .semibold))
                     .foregroundStyle(.white)
-                    .padding(.top, 36)
+                    .padding(.top, 33)
 
                 Text("All Reminders Completed")
-                    .font(.callout)
-                    .foregroundStyle(.gray)
-                    .padding(.top, 16)
+                    .font(.system(size: 16))
+                    .foregroundStyle(Color("SecondaryText").opacity(0.7))
+                    .padding(.top, 14)
             }
             .frame(maxWidth: .infinity)
         }

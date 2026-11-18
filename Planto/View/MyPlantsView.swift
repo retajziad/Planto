@@ -79,44 +79,48 @@ struct MyPlantsView: View {
     // MARK: - Parts of the screen
 
     var header: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 20) {
             Text("My Plants 🌱")
                 .font(.system(size: 34, weight: .bold))
+                .kerning(0.37)
                 .foregroundStyle(.white)
                 .padding(.top, 24)
 
-            Divider()
-                .overlay(Color.white.opacity(0.3))
+            // A 1-point line. Sketch uses a lighter grey on the empty screens.
+            Rectangle()
+                .fill(viewModel.plants.isEmpty ? Color("HeaderDividerEmpty") : Color("HeaderDivider"))
+                .frame(height: 1)
         }
-        .padding(.leading, 16)
+        .padding(.leading, 15)
     }
 
     var noRemindersMessage: some View {
         Text("No reminders set yet..")
-            .font(.title3)
-            .fontWeight(.semibold)
-            .foregroundStyle(.gray)
+            .font(.system(size: 20, weight: .semibold))
+            .foregroundStyle(Color("NoRemindersText"))
             .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     var progressSection: some View {
-        VStack(spacing: 14) {
-            if viewModel.completedCount == 0 {
-                Text("Your plants are waiting for a sip 💦")
-                    .foregroundStyle(.white)
-            } else {
-                Text("\(viewModel.completedCount) of your plants feel loved today ✨")
-                    .foregroundStyle(.white)
+        VStack(spacing: 15) {
+            Group {
+                if viewModel.completedCount == 0 {
+                    Text("Your plants are waiting for a sip 💦")
+                } else {
+                    Text("\(viewModel.completedCount) of your plants feel loved today ✨")
+                }
             }
+            .font(.system(size: 18))
+            .kerning(0.23)
+            .foregroundStyle(.white)
 
             ProgressView(value: viewModel.progress)
-                .tint(Color("ButtonGreen"))
-                .scaleEffect(x: 1, y: 2)
+                .progressViewStyle(PlantoProgressStyle())
                 .animation(.easeInOut, value: viewModel.progress)
         }
-        .padding(.horizontal, 28)
+        .padding(.horizontal, 33)
         .padding(.top, 36)
-        .padding(.bottom, 28)
+        .padding(.bottom, 44)
     }
 
     var plantsList: some View {
@@ -137,7 +141,9 @@ struct MyPlantsView: View {
                 .onTapGesture {
                     plantToEdit = plant
                 }
+                .listRowInsets(EdgeInsets(top: 16, leading: 15, bottom: 10, trailing: 16))
                 .listRowBackground(Color.black)
+                .listRowSeparatorTint(Color("RowDivider"))
                 .swipeActions {
                     Button(role: .destructive) {
                         viewModel.deletePlant(plant)
@@ -157,15 +163,35 @@ struct MyPlantsView: View {
             showAddSheet = true
         } label: {
             Image(systemName: "plus")
-                .font(.title2)
-                .frame(width: 32, height: 40)
+                .font(.system(size: 17, weight: .medium))
+                .frame(width: 30, height: 30)
         }
         .accessibilityLabel("Add Reminder")
         .buttonStyle(.glassProminent)
         .buttonBorderShape(.circle)
         .tint(Color("ButtonGreen"))
-        .padding(.trailing, 28)
-        .padding(.bottom, 16)
+        .padding(.trailing, 30)
+        .padding(.bottom, 7)
+    }
+}
+
+// Draws the ProgressView like the Sketch design:
+// a dark 8-point track with a green bar on top that grows with the progress.
+struct PlantoProgressStyle: ProgressViewStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        // fractionCompleted is a number from 0 to 1 (nil when unknown).
+        let progress = configuration.fractionCompleted ?? 0
+
+        return GeometryReader { geometry in
+            ZStack(alignment: .leading) {
+                Capsule()
+                    .fill(Color("ProgressTrack"))
+                Capsule()
+                    .fill(Color("ButtonGreen"))
+                    .frame(width: geometry.size.width * progress)
+            }
+        }
+        .frame(height: 8)
     }
 }
 
