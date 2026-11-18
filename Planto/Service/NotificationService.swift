@@ -3,9 +3,11 @@ import UserNotifications
 
 // Schedules the local watering notifications.
 //
-// iOS cannot repeat a notification "every 3 days at 9:00 AM" by itself,
+// iOS cannot repeat a notification on a custom schedule by itself,
 // and the app cannot run code in the background whenever it wants.
-// So we schedule the next watering days in advance, one notification per day.
+// So we schedule notifications in advance: one at 9:00 AM on every day the plant
+// is due, starting from its next watering day, until the user checks it.
+// Checking a plant rebuilds the list from its new watering day.
 // iOS keeps at most 64 waiting notifications per app, so we share 60 between the plants.
 // The list is rebuilt after every change and every time the app opens.
 struct NotificationService {
@@ -57,7 +59,11 @@ struct NotificationService {
         }
     }
 
-    // The next watering days of a plant, at 9:00 AM.
+    // The days a plant will be due, at 9:00 AM.
+    // A plant stays due every day until it is checked, so after its first
+    // reminder we add one reminder every morning. When the user checks it,
+    // scheduleReminders runs again and the reminders start from the next
+    // watering day (last watered + watering frequency).
     func reminderDates(for plant: Plant, count: Int) -> [Date] {
         let calendar = Calendar.current
         let now = Date()
@@ -76,12 +82,12 @@ struct NotificationService {
             day = calendar.date(byAdding: .day, value: 1, to: day) ?? day
         }
 
-        // From there, one reminder every "watering days".
+        // From there, one reminder every morning until the plant is checked.
         var dates: [Date] = []
         while dates.count < count {
             let nineAM = calendar.date(bySettingHour: 9, minute: 0, second: 0, of: day) ?? day
             dates.append(nineAM)
-            day = calendar.date(byAdding: .day, value: plant.wateringDays.numberOfDays, to: day) ?? day
+            day = calendar.date(byAdding: .day, value: 1, to: day) ?? day
         }
         return dates
     }

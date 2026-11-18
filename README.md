@@ -1,59 +1,110 @@
-# Planto 🌱 — Plant Care Reminders
+# Planto — Plant Care Reminders
 
-A SwiftUI app for the Apple Developer Academy coding challenge.
-Add your plants, see which ones need water today, check them off, and get a local notification on watering days.
+Planto is an iOS app that helps you remember when to water your plants. You add each plant with its room, light, watering frequency and amount of water, and Planto shows which plants need water today and sends a reminder on watering days.
 
-## Requirements
+Built with SwiftUI as a coding challenge at the Apple Developer Academy.
 
-- Xcode 26 or newer
-- iOS 26 or newer (needed for the Liquid Glass buttons)
+## Main Features
 
-## How to run
+- **Add plants** with a name, room, light, watering frequency and water amount.
+- **See today's reminders** at the top of the list. Other plants appear faded below.
+- **Check off watered plants** by tapping the circle. Tap again to undo.
+- **Track daily progress** with a progress bar and an "All Done!" screen.
+- **Edit a plant** by tapping it.
+- **Delete a plant** by swiping left or from the edit screen.
+- **Get a notification** at 9:00 AM on each day a plant needs water.
+- **Plants stay saved** after you close the app.
+
+## Technologies Used
+
+- **Swift** and **SwiftUI**
+- **MVVM** architecture with an `ObservableObject` view model
+- **UserNotifications** for local watering reminders
+- **UserDefaults** with `Codable` for saving plants on the device
+- **Liquid Glass** button styles (iOS 26)
+- **Icon Composer** for the app icon
+
+The app uses no third-party libraries.
+
+## Getting Started
+
+### Requirements
+
+- Xcode 26 or later (built and tested with Xcode 27.2)
+- iOS 26 or later (the deployment target, required for Liquid Glass)
+
+### Run the App
 
 1. Open `Planto.xcodeproj` in Xcode.
-2. Pick an iPhone simulator at the top of the window (for example iPhone 17).
+2. Choose an iPhone simulator or a connected iPhone as the run destination.
 3. Press **Run** (⌘R).
 
-## Project structure (MVVM)
+The app asks for notification permission the first time you save a plant. If permission is denied, everything except the notifications still works.
+
+## Architecture
+
+Planto follows the **Model–View–ViewModel (MVVM)** pattern:
+
+- **Model:** plain data types. `Plant` stores a plant's details and watering dates, and the form options are enums.
+- **ViewModel:** `PlantsViewModel` holds the list of plants and handles adding, editing, deleting, checking, progress and saving.
+- **View:** SwiftUI screens that display the view model's data and send user actions back to it.
+- **Service:** `NotificationService` schedules and cancels local notifications.
 
 ```
 Planto/
-├── PlantoApp.swift              App entry point
+├── PlantoApp.swift                App entry point
 ├── Model/
-│   ├── Plant.swift              The Plant struct and its watering-date logic
-│   └── PlantOptions.swift       Enums: Room, Light, WateringDays, WaterAmount
+│   ├── Plant.swift                Plant data and watering-date logic
+│   └── PlantOptions.swift         Room, Light, WateringDays, WaterAmount
 ├── ViewModel/
-│   └── PlantsViewModel.swift    Add, edit, delete, check, progress, saving
+│   └── PlantsViewModel.swift      App state and user actions
 ├── View/
-│   ├── ContentView.swift        Shows the splash, then the main screen
-│   ├── SplashView.swift         Splash screen
-│   ├── MyPlantsView.swift       Main screen with all its states
-│   ├── EmptyStateView.swift     "Start your plant journey!" screen
-│   ├── AllDoneView.swift        "All Done!" screen
-│   ├── PlantRowView.swift       One row in the reminders list
-│   └── ReminderFormView.swift   Set Reminder sheet (add and edit)
+│   ├── ContentView.swift          Splash screen, then the main screen
+│   ├── SplashView.swift           Splash screen
+│   ├── MyPlantsView.swift         Main screen and its states
+│   ├── EmptyStateView.swift       First-launch screen
+│   ├── AllDoneView.swift          "All Done!" screen
+│   ├── PlantRowView.swift         One plant in the list
+│   └── ReminderFormView.swift     Add and edit form
 ├── Service/
-│   └── NotificationService.swift  Schedules and cancels local notifications
-└── Assets.xcassets              App icon, illustrations, colors
+│   └── NotificationService.swift  Local notification scheduling
+├── Assets.xcassets                Illustrations and colors
+└── PlantoIcon.icon                App icon (Icon Composer)
 ```
 
-## How the reminders work
+## Reminder Logic
 
 - A new plant is due on the day it is added.
-- Checking a plant saves today's date as its last watering. The next watering day is that date plus the chosen frequency (for example "Every 3 days" = 3 days later).
-- The main list shows every saved plant, so any plant can be edited or deleted at any time. Today's reminders (due, late, or already watered today) come first; plants that do not need water today are shown faded below them.
-- The progress bar and "All Done" only count today's reminders. A plant can also be watered early: checking it counts as today's care and moves its next watering date.
-- Unchecking a plant puts back its previous watering date, so it is due again and its schedule is not lost.
-- "All Done" shows only when there are reminders today and all of them are checked. Tap the All Done screen to see the list again and uncheck a plant checked by mistake.
-- The progress bar is hidden on days with no reminders. After every plant is deleted, the screen shows "No reminders set yet..".
-- The day is refreshed when the app opens, when it comes back from the background, and at midnight while it is open.
-- Plants are saved on the device with UserDefaults, so they are still there after closing the app.
+- When a plant is checked, its next watering date is that day plus its chosen frequency. For example, "Every 3 days" means three days later.
+- A plant that isn't checked stays due every day until it is.
+- The progress bar and the "All Done!" screen count only today's reminders. On days with no reminders, the progress bar is hidden.
+- The list updates when the app opens, when it returns from the background, and at midnight while it is open.
 
-## How the notifications work
+## Notifications
 
-- The app asks for notification permission when the user saves a plant. If the user says no, the app still works normally.
-- iOS cannot repeat a notification "every 3 days at 9:00 AM" on its own, and an app cannot run code in the background whenever it wants. So the app schedules the next watering days in advance, one notification per watering day at 9:00 AM.
-- iOS keeps at most 64 waiting notifications per app. The app shares 60 between the plants (1 plant = its next 60 waterings, 2 plants = 30 each, and so on).
-- The whole list is removed and rebuilt after every add, edit, delete, check and uncheck, and every time the app opens, so there are no duplicate or outdated notifications.
-- If a plant's watering day has passed (or 9:00 AM today already passed), its next reminder is the next 9:00 AM.
-- Limit: with many plants and long gaps without opening the app, the scheduled reminders can run out (for example 10 daily plants = 6 days ahead). Opening the app fills them up again.
+iOS can't repeat a notification on a custom schedule such as "every 3 days", so Planto schedules notifications in advance at 9:00 AM:
+
+- The first notification is on the plant's next watering day. If that day has already passed, or it is today and 9:00 AM has passed, the first notification is the next morning.
+- After that, the reminder repeats every morning until the plant is checked, matching the days the app shows the plant as due.
+- The schedule is rebuilt whenever a plant is added, edited, deleted, checked or unchecked, and whenever the app opens. Checking a plant moves its reminders to its next watering day.
+
+iOS allows an app at most 64 scheduled notifications. Planto shares 60 of them between all plants, so each plant's reminders cover about 60 ÷ (number of plants) days from its due date. For example, with 10 plants each plant has 6 days of reminders.
+
+## Design
+
+The interface follows the challenge's Sketch design: dark mode, the original plant illustrations, and exact colors, font sizes and spacing taken from the Sketch file. See [DESIGN_SPECS.md](DESIGN_SPECS.md) for the values used and the few places where the app differs from the design.
+
+The app icon is [`Planto/PlantoIcon.icon`](Planto/PlantoIcon.icon), an Icon Composer file whose default appearance uses the dark design.
+
+## Known Limitations
+
+- **Notifications can run out.** If the app isn't opened for longer than a plant's reminders cover, that plant gets no more notifications until the app is opened again.
+- **Very large plant lists:** with more than 60 plants, each plant gets only its next notification. With more than 64, iOS keeps only 64, so some plants get none.
+- **No same-day notification after 9:00 AM.** A plant that becomes due after 9:00 AM, for example one added in the afternoon, gets its first notification the next morning.
+- **The notification time is fixed.** It is always 9:00 AM and can't be changed in the app.
+- **Plants are stored only on this device.** There is no iCloud sync or backup.
+- **Testing was limited to the iOS Simulator:**
+  - The list of scheduled notifications was checked after adding, editing, deleting, checking and unchecking plants.
+  - No real 9:00 AM notification from the app was observed.
+  - Nothing was tested on a physical iPhone.
+  - The midnight refresh while the app stays open was not tested in real time.
