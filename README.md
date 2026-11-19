@@ -4,6 +4,10 @@ Planto is an iOS app that helps you remember when to water your plants. You add 
 
 Built with SwiftUI as a coding challenge at the Apple Developer Academy.
 
+<p align="center">
+  <img src="docs/images/hero.png" alt="Planto on three iPhones: the Set Reminder form, the My Plants list with today's progress, and the All Done screen" width="100%">
+</p>
+
 ## Main Features
 
 - **Add plants** with a name, room, light, watering frequency and water amount.
@@ -14,6 +18,17 @@ Built with SwiftUI as a coding challenge at the Apple Developer Academy.
 - **Delete a plant** by swiping left or from the edit screen.
 - **Get a notification** at 9:00 AM on each day a plant needs water.
 - **Plants stay saved** after you close the app.
+
+## Screenshots
+
+<table>
+  <tr>
+    <td align="center" valign="top" width="25%"><img src="docs/images/screen-empty-state.png" alt="Empty state with the Set Plant Reminder button" width="170"><br><sub>Empty State</sub></td>
+    <td align="center" valign="top" width="25%"><img src="docs/images/screen-my-plants.png" alt="My Plants list with daily progress" width="170"><br><sub>My Plants</sub></td>
+    <td align="center" valign="top" width="25%"><img src="docs/images/screen-set-reminder.png" alt="Set Reminder form" width="170"><br><sub>Set Reminder</sub></td>
+    <td align="center" valign="top" width="25%"><img src="docs/images/screen-all-done.png" alt="All Done screen" width="170"><br><sub>All Done</sub></td>
+  </tr>
+</table>
 
 ## Technologies Used
 
