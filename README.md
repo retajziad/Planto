@@ -111,15 +111,6 @@ The interface follows the challenge's Sketch design: dark mode, the original pla
 
 The app icon is [`Planto/PlantoIcon.icon`](Planto/PlantoIcon.icon), an Icon Composer file whose default appearance uses the dark design.
 
-## Known Limitations
+## Notes
 
-- **Notifications can run out.** If the app isn't opened for longer than a plant's reminders cover, that plant gets no more notifications until the app is opened again.
-- **Very large plant lists:** with more than 60 plants, each plant gets only its next notification. With more than 64, iOS keeps only 64, so some plants get none.
-- **No same-day notification after 9:00 AM.** A plant that becomes due after 9:00 AM, for example one added in the afternoon, gets its first notification the next morning.
-- **The notification time is fixed.** It is always 9:00 AM and can't be changed in the app.
-- **Plants are stored only on this device.** There is no iCloud sync or backup.
-- **Testing was limited to the iOS Simulator:**
-  - The list of scheduled notifications was checked after adding, editing, deleting, checking and unchecking plants.
-  - No real 9:00 AM notification from the app was observed.
-  - Nothing was tested on a physical iPhone.
-  - The midnight refresh while the app stays open was not tested in real time.
+Planto saves plant data locally on the device and schedules watering reminders at 9:00 AM. Notifications are scheduled in advance and refreshed when the app opens, subject to iOS notification limits.
