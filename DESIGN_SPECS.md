@@ -1,119 +1,272 @@
-# Planto — Design Specifications from Sketch
+# Planto — Design System & Implementation Notes
 
-Values below were read from the layer data inside `Plants App🌱 Copy 43.sketch` (page "🌱 High-fidelity"),
-not measured from screenshots. Sketch artboards are 428 × 926 pt. Positions are in points.
+## 1. Overview
 
-**Legend:** ✅ exact value from Sketch · ⚠️ inferred or approximated · ❌ not available in the file
+This document connects Planto's Sketch design with its SwiftUI implementation. It covers the design values, the components built from them, and the places where the app uses native iOS styling instead of the mockup.
 
-## Colors
+**Source.** Design values come from the layer data of the original high-fidelity Sketch design, whose artboards are 428 × 926 pt. Implementation values refer to an iPhone 18 Pro, which is 402 pt wide.
 
-| Element | Sketch value | Source |
-|---|---|---|
-| Screen background | `#000000` | ✅ artboard fill |
-| Sheet background | `#1C1C1E` | ✅ "Frame" fill (Set Reminder) |
-| Form card background | `#2C2C2E` | ✅ "Rectangle 15" fill |
-| Header divider (start / no reminders) | `#39393B`, 1 pt | ✅ "Rectangle 2" |
-| Header divider (list / All Done) | `#181819`, 1 pt | ✅ "Rectangle 2" |
-| Row divider (plant list) | `#222224`, 1 pt | ✅ "Rectangle 1" |
-| Form row divider | `#414144`, 1 pt | ✅ "Rectangle 14" |
-| Primary green (buttons, progress fill) | `#338069` | ✅ symbol color overrides + "Filled" |
-| Progress track | `#262626` | ✅ "Frame" fill |
-| Completed check | `#28E0A8` | ✅ 􀁣 text color |
-| Unchecked circle | `#979797` border, 1.2 pt | ✅ "Circle" oval |
-| Text-field cursor | `#29DFA8` | ✅ "Cursor" (app uses `#28E0A8`, 1 unit apart) |
-| Primary text | `#FFFFFF` | ✅ |
-| Room text | `#FFFFFF` at 50% | ✅ |
-| Completed plant name | `#989898` | ✅ text-layer fill |
-| Light chip text | `#CCC785` (68% opacity when completed) | ✅ |
-| Water chip text | `#CAF3FB` | ✅ text-layer fill (overrides the `#005EF3` run color) |
-| Chip background | `#18181D` | ✅ |
-| Secondary text (empty / All Done) | `#9F9F91` at 70% | ✅ |
-| "No reminders set yet.." | `#756F6F` | ✅ |
-| Form value text and chevrons | `#8E8E93` | ✅ |
-| Placeholder "Pothos" | `#666666` | ✅ |
-| Destructive "Delete Reminder" | `#FF453A` | ✅ Apple "Lists/Destructive" symbol |
-| All Done backdrop oval | `#14141A` at 58% | ✅ (already inside `PlantWink.svg`) |
+**Design principles**
 
-## Typography
+- **Dark only.** The design has no light mode, so the app always runs in dark appearance.
+- **System font.** All text uses the native iOS system font (SF Pro), so no custom fonts are bundled.
+- **Native components.** Lists, forms, sheets and Liquid Glass buttons are standard SwiftUI components styled with Planto's colors, so they behave like the rest of iOS.
+- **One brand green.** `#338069` is used for every primary action and for progress.
 
-All text uses the iOS system font (SF Pro).
+**Notation.** Values are exact unless marked **≈**, which means approximate or varying between artboards. "Sketch" refers to the design file and "SwiftUI" to the code.
 
-| Text | Font | Size | Kerning | Alignment |
-|---|---|---|---|---|
-| "My Plants 🌱" | SF Pro Display Bold | 34 | 0.374 | left |
-| "Start your plant journey!" / "All Done! 🎉" | SF Pro Semibold | 25 | 0 | center |
-| Empty-state body / "All Reminders Completed" | SF Pro Regular | 16 | 0 | center |
-| "No reminders set yet.." | SF Pro Semibold | 20 | 0 | center |
-| Progress text | SF Pro Regular | 18 | 0.234 | center |
-| Room ("in Kitchen") | SF Pro Text Regular | 15 | -0.24 | left |
-| Plant name | SF Pro Regular | 28 | 0.364 | left |
-| Light chip | SF Pro Regular | 14 | 0 | left |
-| Water chip | SF Pro Medium | 14 | 0 | left |
-| Button labels ("Set Plant Reminder") | SF Pro Medium | 17 | — | center |
-| Sheet title "Set Reminder" | SF Pro Semibold | 17 | — | center |
-| Form row labels and values | SF Pro Regular | 18 (Light label: 17) | -0.455 | left / right |
-| "Plant Name" label | Helvetica 18 ⚠️ | 18 | 0 | left |
-| Placeholder | SF Pro Regular | 17 | 0 | left |
+## 2. Color Palette
 
-- Line height: not set on most layers (❌, so the system default applies). It is fixed at 22 pt on form rows and 16 pt on the water chip.
-- "Plant Name" uses Helvetica in Sketch, unlike every other label. It is probably accidental; the app uses the system font, since no new fonts were to be added.
+### Brand and content colors
 
-## Layout and components
+These are stored as color assets in `Assets.xcassets`. Each has a single value, with no separate light and dark variants.
 
-| Component | Sketch value |
-|---|---|
-| Title position | x 16, y 83; 20 pt above the header divider |
-| Header divider | x 15 to the right edge, y 143 |
-| Empty-state illustration | 164 × 200, centered, 77 pt below divider |
-| Gap: illustration → heading → body → button | 37 / 25 / 105 pt |
-| Empty-state body width | 315 pt |
-| "Set Plant Reminder" button | 280 × 42, Glass Prominent, tint `#338069` |
-| + button | 44 × 44 circle, Glass Prominent, tint `#338069`, 30 pt from the right edge |
-| Progress text → bar | 15 pt; text sits 34–38 pt below the divider (differs between artboards) |
-| Progress bar | 361 × 8, corner radius 4; ≈33 pt side margins |
-| Bar → first row | ≈60 pt |
-| Plant row | ≈111–113 pt tall; circle x 15 (23 × 23); text x 65–67 |
-| Row inner gaps | room → name 4–5 pt, name → chips 7 pt |
-| Chips | height 23, corner radius 8, 13 pt apart, ≈9 pt horizontal padding |
-| Set Reminder cards | width 388, corner radius 30; name card 59 tall; two-row cards 95–98 tall |
-| Gaps between cards | 50 / 40 pt; Delete row 85 pt below |
-| Sheet toolbar buttons | 44 × 44 glass |
-| All Done illustration | 219 × 227, 127 pt below divider; title 33 pt below; subtitle 14 pt below title |
-| Shadows | Only inside Apple's Liquid Glass button symbols (system-rendered); none on Planto's own layers |
-
-## Sketch vs. SwiftUI (before this change)
-
-| Element | Sketch | SwiftUI before | Fixed? |
+| Asset | Hex | Opacity | Use |
 |---|---|---|---|
-| Primary green | `#338069` | `#29765F` (sampled from PDF) | ✅ |
-| Header divider | `#39393B` / `#181819`, 1 pt, 20 pt below title | white 30%, 12 pt below | ✅ |
-| Title kerning | 0.374 | none | ✅ |
-| Progress text | 18 pt, kerning 0.234 | 17 pt | ✅ |
-| Progress bar | `#262626` track, `#338069` fill, 8 pt | system track, `#29765F`, scaled ×2 | ✅ (custom ProgressViewStyle) |
-| Progress margins | ≈33 pt sides, 15 pt below text | 28 / 14 | ✅ |
-| Row divider | `#222224`, starts under the circle | system grey, starts under the text | ✅ |
-| Unchecked circle | `#979797`, 25 pt glyph | system grey, 26 pt | ✅ |
-| Circle → text gap | text at x 67 | x 71.7 | ✅ (x 67.7 now) |
-| Room text | 15 pt, white 50%, kerning -0.24 | 15 pt, system grey | ✅ |
-| Plant name kerning / completed color | 0.364 / `#989898` | none / system grey | ✅ |
-| Chips | 14 pt (water: Medium), height 23, 13 pt apart | 13 pt, padding 4, 12 apart | ✅ |
-| Completed row | only name grey + light chip at 68% | whole row at 80% opacity (dimmed the green check) | ✅ |
-| Empty body text | 16 pt `#9F9F91` 70%, width 315 | 15 pt system grey | ✅ |
-| Empty-state spacing | 77 / 37 / 25 / 105 | 71 / 41 / 22 / 100 | ✅ |
-| "Set Plant Reminder" | 280 × 42, Medium 17 | 276 × 42, Semibold 17 | ✅ (280 × 42 now) |
-| + button | 44 × 44, 17 pt Medium symbol | 34 × 34, 22 pt symbol | ✅ (44 × 44 now) |
-| "No reminders set yet.." | `#756F6F` | system grey | ✅ |
-| All Done spacing / subtitle | 33 / 14, `#9F9F91` 70% | 36 / 16, system grey | ✅ |
-| Placeholder | `#666666` | system placeholder | ✅ |
-| Form text | 18 pt | 17 pt | ✅ |
-| Form dividers | `#414144` | system | ✅ |
-| Card spacing / row height | 40–50 pt / ≈47 pt; name card 59 | system defaults | ✅ (spacing 40, min row height 47, name row padded) |
+| `ButtonGreen` | `#338069` | 100% | Primary buttons, Save button, + button, progress fill |
+| `CheckGreen` | `#28E0A8` | 100% | Completed check, text cursor |
+| `AccentColor` | `#28E0A8` | 100% | App accent color |
+| `ProgressTrack` | `#262626` | 100% | Progress bar track |
+| `CircleGray` | `#979797` | 100% | Unchecked circle |
+| `CompletedName` | `#989898` | 100% | Plant name after watering |
+| `SunYellow` | `#CCC785` | 100%, 68% when watered | Light chip text and icon |
+| `WaterBlue` | `#CAF3FB` | 100% | Water chip text and icon |
+| `ChipBackground` | `#18181D` | 100% | Chip background |
+| `SecondaryText` | `#9F9F91` | 70% (applied in code) | Body text on Empty State and All Done |
+| `NoRemindersText` | `#756F6F` | 100% | "No reminders set yet.." |
+| `PlaceholderText` | `#666666` | 100% | Name field placeholder ("Pothos") |
+| `HeaderDividerEmpty` | `#39393B` | 100% | Header divider when there are no plants |
+| `HeaderDivider` | `#181819` | 100% | Header divider when plants exist |
+| `RowDivider` | `#222224` | 100% | Plant list separators |
+| `FormDivider` | `#414144` | 100% | Set Reminder row separators |
 
-## Not matched exactly, and why
+### System colors
 
-- **Form card corner radius (Sketch: 30):** iOS draws Form sections with its own radius; there is no native setting for it.
-- **Sheet toolbar buttons (Sketch: 44 × 44):** iOS 26 draws native toolbar glass buttons at 36 × 36. Kept native for Liquid Glass.
-- **"Full sun" vs "Full Sun":** Sketch rows say "Full sun"; the app uses the option list from the challenge brief ("Full Sun").
-- **Device size:** Sketch is 428 pt wide; the test simulator (iPhone 18 Pro) is 402 pt. Margins are kept, so centered items scale with the screen.
-- **Faded not-due rows (50%):** not in Sketch. It is an app behavior added earlier to mark plants that are not due today.
-- **Line heights:** not set in Sketch for most layers, so the system default is used.
+These Sketch colors come from SwiftUI or iOS in dark mode, so they aren't stored as assets.
+
+| Element | Hex | Provided by |
+|---|---|---|
+| Screen background | `#000000` | `Color.black` |
+| Primary text | `#FFFFFF` | `.white` |
+| Room text | `#FFFFFF` at 50% | `Color.white.opacity(0.5)` |
+| Set Reminder sheet background | `#1C1C1E` | iOS grouped background (dark) |
+| Form card background | `#2C2C2E` | iOS grouped cell background (dark) |
+| Form values and chevrons | `#8E8E93` | `.tint(.gray)` on the form |
+| "Delete Reminder" | `#FF453A` | Destructive button role (dark) |
+
+**Notes**
+
+- **Two greens:** `#338069` fills buttons and the progress bar. `#28E0A8` is used only for small accents: the completed check and the text cursor.
+- **Cursor:** Sketch uses `#29DFA8`. The app reuses `CheckGreen` (`#28E0A8`), which is one unit away, instead of adding a near-duplicate color.
+- **All Done backdrop:** the oval behind the All Done illustration (`#14141A` at 58%) is part of `PlantWink.svg`, not a separate color.
+
+## 3. Typography
+
+All text uses the native iOS system font (SF Pro). Most styles set an explicit size and weight with `.system(size:weight:)`, matching Sketch. The splash subtitle uses the semantic `.title3` style, and the "Set Reminder" title is the standard inline navigation title. Kerning follows Sketch, rounded to two decimals.
+
+| Style | Weight | Size | Kerning (Sketch → SwiftUI) | Color | Alignment |
+|---|---|---|---|---|---|
+| Screen title "My Plants 🌱" | Bold | 34 | 0.374 → 0.37 | White | Leading |
+| Screen heading ("Start your plant journey!", "All Done! 🎉") | Semibold | 25 | 0 | White | Center |
+| Body (Empty State, All Done) | Regular | 16 | 0 | `SecondaryText` 70% | Center |
+| "No reminders set yet.." | Semibold | 20 | 0 | `NoRemindersText` | Center |
+| Progress message | Regular | 18 | 0.234 → 0.23 | White | Center |
+| Room ("in Kitchen") | Regular | 15 | −0.24 | White 50% | Leading |
+| Plant name | Regular | 28 | 0.364 → 0.36 | White / `CompletedName` | Leading |
+| Light chip | Regular | 14 | 0 | `SunYellow` | Leading |
+| Water chip | Medium | 14 | 0 | `WaterBlue` | Leading |
+| Button label ("Set Plant Reminder", + symbol) | Medium | 17 | — | White | Center |
+| Sheet title "Set Reminder" | Semibold | 17 | — | White | Center |
+| Form labels and values | Regular | 18 | Sketch −0.455; not applied | White / gray | Leading / trailing |
+| Name field and placeholder | Regular | 17 | 0 | White / `PlaceholderText` | Leading |
+| "Delete Reminder" | Regular | 17 | — | `#FF453A` | Center |
+
+**Notes**
+
+- **Line height:** Sketch leaves it unset on most layers. It is fixed at 22 pt on form rows and 16 pt on the water chip. The app uses system line heights everywhere.
+- **Chip weights:** as in Sketch, the water chip is Medium and the light chip is Regular.
+- **Form text:** the Sketch Light label is 17 pt and the other form labels are 18 pt. The app uses 18 pt for all form rows.
+- **"Plant Name" font:** in Sketch this label uses Helvetica 18. The app uses SF Pro like every other label.
+
+## 4. Layout & Spacing
+
+All values are in points. Horizontal margins are fixed, and centered content stays centered on narrower screens.
+
+### Header (all main screens)
+
+| Element | Sketch | SwiftUI |
+|---|---|---|
+| Title position | x 16, y 83 | Leading 15, shared with the divider |
+| Title to divider | 20 | `VStack(spacing: 20)` |
+| Divider | 1 pt, x 15 to the right edge, y 143 | 1 pt `Rectangle`, leading 15, full width |
+
+### Empty State
+
+| Element | Value |
+|---|---|
+| Illustration | 164 × 200, centered, 77 below the divider |
+| Illustration → heading | 37 |
+| Heading → body | 25 |
+| Body width | 315 |
+| Body → button | 105 |
+| "Set Plant Reminder" button | 280 × 42 |
+
+### My Plants
+
+| Element | Sketch | SwiftUI |
+|---|---|---|
+| Divider → progress message | ≈34–38 (differs between artboards) | 36 |
+| Message → bar | 15 | 15 |
+| Progress bar | 361 × 8, ≈33 side margins | Full width minus 33 on each side, 8 tall |
+| Bar → first row | ≈60 | 44 + 16 row inset = 60 |
+| Row insets | — | Top 16, leading 15, bottom 10, trailing 16 |
+| Row height | ≈111–113 | Set by content and insets |
+| Check circle | 23 × 23 at x 15 | SF Symbol at 25 pt, leading 15 |
+| Circle → text | Text at x 65–67 | 23 spacing (text at ≈67.7) |
+| Room → name | ≈4–5 | 4 |
+| Name → chips | 7 | 7 |
+| + button | 44 × 44, 30 from the right edge | 44 × 44, trailing 30, bottom 7 |
+
+### All Done
+
+| Element | Value |
+|---|---|
+| Illustration | 219 × 227, 127 below the divider |
+| Illustration → title | 33 |
+| Title → subtitle | 14 |
+
+### Set Reminder
+
+| Element | Sketch | SwiftUI |
+|---|---|---|
+| Card width | 388 | System inset grouped width |
+| Name card height | 59 | ≈59 (47 minimum row height + 6 top and bottom padding) |
+| Two-row card height | ≈95–98 | Two rows, 47 minimum each |
+| Gap between cards | ≈50 / 40 | 40 (`listSectionSpacing`) |
+| "Delete Reminder" card | 85 below the last card | 40 below, same as other sections |
+
+## 5. UI Components & States
+
+### Primary button — "Set Plant Reminder"
+
+- **Visual:** 280 × 42 Liquid Glass Prominent capsule, tinted `ButtonGreen`, with a 17 pt Medium white label.
+- **SwiftUI:** `.buttonStyle(.glassProminent)` with a 256 × 28 label frame. The glass style adds its own padding, which brings the button to 280 × 42.
+
+### Add button (+)
+
+- **Visual:** 44 × 44 Liquid Glass circle in `ButtonGreen` with a 17 pt Medium plus symbol, floating at the bottom right of every main screen except the first-launch Empty State.
+- **SwiftUI:** a 30 × 30 symbol frame with `.glassProminent` and `.buttonBorderShape(.circle)`, which renders at 44 × 44. Its accessibility label is "Add Reminder".
+
+### Progress bar
+
+- **Visual:** an 8 pt capsule (corner radius 4) with a `ProgressTrack` track and a `ButtonGreen` fill.
+- **SwiftUI:** a custom `PlantoProgressStyle`, because the default `ProgressView` doesn't let you set the track color or the bar height. The fill animates with ease-in-out when a plant is checked.
+- **Message:** "Your plants are waiting for a sip 💦" when none of today's plants are watered, and "N of your plants feel loved today ✨" once at least one is.
+- **Visibility:** hidden on days with no reminders.
+
+### Plant row
+
+The row has a check control on the left, then three lines: room, plant name, and the chips. Tapping the circle checks the plant, and tapping anywhere else in the row opens it for editing.
+
+| State | Check | Name | Light chip | Water chip | Row |
+|---|---|---|---|---|---|
+| Due today | `circle`, `CircleGray` | White | 100% | 100% | 100% |
+| Watered today | `checkmark.circle.fill`, `CheckGreen` | `CompletedName` | 68% | 100% | 100% |
+| Not due today | `circle`, `CircleGray` | White | 100% | 100% | 50% |
+
+- **Order:** today's reminders are listed first, then plants that are not due.
+- **Separators:** 1 pt `RowDivider`, starting under the check circle as in Sketch rather than under the text.
+- **Delete:** swiping left shows a delete action with an icon only.
+
+### Chips
+
+| Property | Value |
+|---|---|
+| Height | 23 |
+| Corner radius | 8 |
+| Horizontal padding | 9 |
+| Icon → text | 4 |
+| Gap between chips | 13 |
+| Background | `ChipBackground` |
+| Light icons | `sun.max` (Full Sun), `sun.horizon` (Partial Sun), `moon` (Low Light) |
+| Water icon | `drop` |
+
+### Set Reminder sheet
+
+- **Shared screen:** the same sheet is used to add and to edit a plant. Its title is "Set Reminder", inline.
+- **Toolbar:**
+  - **Cancel:** an `xmark` glass button.
+  - **Save:** a `checkmark` button with `.glassProminent` and a `ButtonGreen` tint. It is disabled until the name contains text.
+- **Sections:**
+  1. Plant name.
+  2. Room and Light pickers.
+  3. Watering Days and Water pickers.
+  4. "Delete Reminder", shown only when editing.
+- **Pickers:** each label has an SF Symbol: `location` (Room), `sun.max` (Light), `drop` (Watering Days and Water). Values show in system gray with up/down chevrons.
+
+### Screen states
+
+| State | When | Header divider |
+|---|---|---|
+| Empty State | No plants have ever been added | `HeaderDividerEmpty` |
+| No reminders | Every plant has been deleted | `HeaderDividerEmpty` |
+| Plant list | Plants exist and All Done isn't showing | `HeaderDivider` |
+| All Done | At least one plant was due today and all of them are watered; tapping it shows the list | `HeaderDivider` |
+
+### Splash screen
+
+Shown for 1.5 seconds at launch:
+
+- `PlantHappy` at 140 pt wide.
+- "Planto" in 44 pt Bold.
+- "Plant Care reminders 🌿" in the system Title 3 style, gray.
+- 12 pt spacing between the three elements.
+
+The Sketch values in this document don't cover the splash screen.
+
+## 6. Illustrations & App Icon
+
+### Illustrations
+
+| Asset | Size in app | Used on |
+|---|---|---|
+| `PlantHappy.svg` | 164 wide (Empty State), 140 wide (splash) | Empty State, splash |
+| `PlantWink.svg` | 219 wide | All Done |
+
+- **Source:** both illustrations are vector exports from the Sketch design, not redrawn or cropped from an image.
+- **Format:** the asset catalog keeps them as SVG with "Preserve Vector Data" enabled, so they stay sharp at every size.
+
+### App icon
+
+The icon is [`Planto/PlantoIcon.icon`](Planto/PlantoIcon.icon), an Icon Composer document set as the app icon (`ASSETCATALOG_COMPILER_APPICON_NAME = PlantoIcon`).
+
+- **Layers:** three SVG layers (`Planto1.svg`, `planto-2.svg`, `planto3 2.svg`), each in its own group with a neutral shadow at 50% and 30% translucency.
+- **Liquid Glass:** enabled on the `Planto1` layer.
+- **Default appearance:** uses the dark design, with a `system-dark` background fill and the `planto-2` layer in Multiply blend mode.
+- **Other appearances:** Dark, Clear and Tinted use their own settings in the file.
+
+## 7. Implementation Decisions
+
+**Native SwiftUI styling**
+
+- **Form cards (Sketch corner radius: 30):** we kept SwiftUI's native Form styling instead of rebuilding the cards by hand, so the cards use the system corner radius. Pickers and the keyboard work as they do in other iOS apps.
+- **Sheet toolbar buttons (Sketch: 44 × 44):** Cancel and Save are native toolbar items, so their size and Liquid Glass look come from the system, not from the Sketch buttons.
+- **Form spacing:** sections use one 40 pt spacing, so "Delete Reminder" sits 40 pt below the last card instead of 85 pt as in Sketch.
+- **Form text:** form rows keep system text metrics, so the Sketch kerning (−0.455) and fixed line heights aren't applied.
+- **Shadows:** Planto has no custom shadows. The only shadows in Sketch belong to Apple's Liquid Glass button symbols, and in the app they come from the system glass styles.
+
+**Content and consistency**
+
+- **"Full Sun" vs. "Full sun":** the app uses the option labels from the challenge brief, which capitalize "Sun".
+- **Fonts:** "Plant Name" uses SF Pro instead of Helvetica, so the app has a single type family.
+- **Colors:** the cursor reuses `CheckGreen`, and small Sketch kerning values are rounded to two decimals.
+
+**Behavior added beyond the mockup**
+
+- **Faded rows:** plants that are not due today appear at 50% opacity below today's reminders. This isn't in Sketch. It keeps every plant in the list, so any plant can be edited or deleted on any day.
+- **Watered state:** as in Sketch, only the name color and the light chip change when a plant is watered, and the check stays at full opacity.
+
+**Screen size and appearance**
+
+- **Device width:** Sketch artboards are 428 pt wide and the test device is 402 pt. Margins stay fixed, so centered content and full-width elements adapt to the screen.
+- **Dark appearance:** the app sets `.preferredColorScheme(.dark)` and `UIUserInterfaceStyle = Dark`, so it always uses the dark design regardless of the system setting.
